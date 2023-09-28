@@ -17,9 +17,11 @@ coord_px = np.concatenate((np.squeeze(corners_1[1]),np.squeeze(corners_2[1])))
 print(coord_px.shape)
 
 # Coord_mm
-coord_mm = np.zeros(176,3)
+coord_mm = []
 Nx,Ny = 11,8
 x,y=0,0
-for i in range(88):
-    coord_mm[i] = np.array([x*20,y*20,0])
-    coord_mm[i+88] = np.array([x*20,y*20,100])
+for z in [0,100]:    
+    for y in range(Nx):
+        for x in range(Ny):
+            coord_mm.append(np.array([x*-20,y*-20,z]))
+coord_mm = np.array(coord_mm)
