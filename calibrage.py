@@ -35,7 +35,7 @@ objp[0,:,:2] = np.mgrid[0:Nx, 0:Ny].T.reshape(-1, 2) * -20
 
 # Implémentation de TSAI
 N = len(coord_mm)
-i1,i2 = img1.shape[0]/2,img1.shape[1]/2
+i1,i2 = img1.shape[1]/2,img1.shape[0]/2
 #print(i1,i2)
 U_tilde = coord_px - np.array([i1,i2])
 
@@ -66,11 +66,19 @@ r21 = L[4]*o2c
 r22 = L[5]*o2c
 r23 = L[6]*o2c
 
+# ecriture scientifique
+
+
 r31,r32,r33 = np.cross([r11,r12,r13],[r21,r22,r23])
+
+
+
 
 phi = -np.arctan(r23/r33)
 gamma = -np.arctan(r12/r11)
 omega = np.arctan(r13/(-r23*np.sin(phi)+r33*np.cos(phi)))
+
+
 
 # r31 = -np.cos(phi)*np.sin(omega)*np.cos(gamma) + np.sin(phi)*np.sin(gamma)
 # r32 = -np.cos(phi)*np.sin(omega)*np.sin(gamma) + np.sin(phi)*np.cos(gamma)
@@ -87,10 +95,13 @@ for k in range(N):
 
 o3c,f2 = np.linalg.pinv(B)@R
 
+# print("o3c = {}".format(o3c))
+# print("f2 = {}".format(f2))
 # Déterminer s1 et s2
 f = 4
 s2 = f/f2
 s1 = s2/beta
+#scientific notation
 f1 = f2/beta
 # print("(s1,s2) = ({},{})".format(s1[0],s2[0]))
 # print("(f1,f2) = ({},{})".format(f1[0],f2[0]))
@@ -126,17 +137,49 @@ M_cam = M_int[:3,:3]
 M_cam[2,2] = 1
 proj_cv2 = cv2Calibrate(coord_px,coord_mm,M_cam,img1.shape[1],img1.shape[0])
 
-plt.figure()
-plt.title('Image 1')
-plt.imshow(img1)
-plt.scatter(U_proj[:88,0],U_proj[:88,1])
-plt.scatter(proj_cv2[0][:88,:,0],proj_cv2[0][:88,:,1])
-plt.legend(['Tsau','CV2'])
+error_proj = np.linalg.norm(U_proj-coord_px)/len(coord_px)
+error_cv2 = np.linalg.norm(np.squeeze(proj_cv2[0])-coord_px)/len(coord_px)
 
-plt.figure()
-plt.title('Image 2')
-plt.imshow(img2)
-plt.scatter(U_proj[88:,0],U_proj[88:,1])
-plt.scatter(proj_cv2[0][88:,:,0],proj_cv2[0][88:,:,1])
-plt.legend(['Tsau','CV2'])
-plt.show()
+print("Erreur Tsai = {}".format(error_proj))
+print("Erreur CV2 = {}".format(error_cv2))
+
+
+print = True
+if print:
+        
+    # plt.figure()
+    # # plt.title('Image 1')
+    # plt.imshow(img1)
+    # plt.scatter(U_proj[:88,0],U_proj[:88,1],s=10)
+    # # plt.scatter(proj_cv2[0][:88,:,0],proj_cv2[0][:88,:,1])
+    # plt.legend(['Tsau','CV2'])
+    # plt.axis('off')
+    # plt.savefig('./Results/Tsai_im1.eps',format='eps')
+
+    # plt.figure()
+    # # plt.title('Image 2')
+    # plt.imshow(img2)
+    # plt.scatter(U_proj[88:,0],U_proj[88:,1],s=10)
+    # # plt.scatter(proj_cv2[0][88:,:,0],proj_cv2[0][88:,:,1])
+    # plt.legend(['Tsau','CV2'])
+    # plt.axis('off')
+    # plt.savefig('./Results/Tsai_im2.eps',format='eps')
+
+    plt.figure()
+    # plt.title('Image 1')
+    plt.imshow(img1)
+    plt.scatter(U_proj[:88,0],U_proj[:88,1],s=10)
+    plt.scatter(proj_cv2[0][:88,:,0],proj_cv2[0][:88,:,1],s=10)
+    plt.legend(['Tsau','CV2'])
+    plt.axis('off')
+    plt.savefig('./Results/Tsai_im1_cv2.eps',format='eps')
+
+    plt.figure()
+    # plt.title('Image 2')
+    plt.imshow(img2)
+    plt.scatter(U_proj[88:,0],U_proj[88:,1],s=10)
+    plt.scatter(proj_cv2[0][88:,:,0],proj_cv2[0][88:,:,1],s=10)
+    plt.legend(['Tsau','CV2'])
+    plt.axis('off')
+    plt.savefig('./Results/Tsai_im2_cv2.eps',format='eps')
+    plt.show()
